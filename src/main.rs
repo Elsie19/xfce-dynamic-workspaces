@@ -13,7 +13,7 @@ extern "C" fn workspace_callback(
     user_data: glib_sys::gpointer,
 ) {
     unsafe {
-        let workspaces = &mut *(user_data as *mut DynamicWorkspaces);
+        let workspaces = &mut *user_data.cast::<DynamicWorkspaces>();
         workspaces.handle_dynamic_workspaces();
     }
 }
@@ -30,16 +30,14 @@ struct DynamicWorkspaces {
 impl DynamicWorkspaces {
     pub fn new(debug: bool, notify: bool) -> Self {
         let screen = Screen::get_default();
-
-        // This forces Wnck to query the window manager
         screen.force_update();
 
-        // Let GTK process pending events once
         unsafe {
             while gtk_sys::gtk_events_pending() != 0 {
                 gtk_sys::gtk_main_iteration_do(0);
             }
         }
+
         Self {
             debug,
             notify,
@@ -137,7 +135,7 @@ impl DynamicWorkspaces {
         }
     }
 
-    pub fn remove_blacklist(&self, windows: &mut Vec<Window>) -> Vec<Window> {
+    pub fn remove_blacklist(&self, windows: &mut [Window]) -> Vec<Window> {
         let keep: Vec<Window> = windows
             .iter()
             .filter(|window| {
@@ -233,10 +231,13 @@ impl DynamicWorkspaces {
         }
 
         let self_ptr = self as *mut _ as gpointer;
+        let gobject = screen_ptr.cast::<gobject_sys::GObject>();
 
-        let gobject = screen_ptr as *mut gobject_sys::GObject;
-        let callback: GCallback =
-            unsafe { Some(std::mem::transmute(workspace_callback as *const ())) };
+        let callback: GCallback = unsafe {
+            Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                workspace_callback as *const (),
+            ))
+        };
 
         let signals = [
             "active-workspace-changed",
@@ -276,8 +277,8 @@ fn main() {
         .map(|cstr| cstr.as_ptr().cast_mut())
         .collect();
 
-    let mut argc: c_int = c_args.len() as c_int;
-    let mut argv_ptr: *mut *mut c_char = c_args.as_mut_ptr();
+    let mut argc = c_args.len() as c_int;
+    let mut argv_ptr = c_args.as_mut_ptr();
 
     unsafe {
         if gdk_sys::gdk_init_check(&raw mut argc, &raw mut argv_ptr) == 0 {
