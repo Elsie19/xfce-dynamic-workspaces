@@ -1,4 +1,5 @@
-use gtk::Application;
+use std::ffi::{CString, c_char, c_int, c_void};
+
 use wmctrl::desktop;
 use wnck::{Screen, Window};
 
@@ -182,16 +183,16 @@ impl DynamicWorkspaces {
         }
     }
 
-    pub fn connect_signals(&self) {
+    pub fn connect_signals(&mut self) {
         let _ = desktop::set_desktop_count(1);
 
-        for signal in [
+        let signals = [
             "active-workspace-changed",
             "workspace-created",
             "workspace-destroyed",
             "window-opened",
             "window-closed",
-        ] {}
+        ];
     }
 }
 
@@ -200,7 +201,7 @@ fn main() {
     let mut debug = false;
     let mut notify = true;
 
-    for arg in args {
+    for arg in &args {
         if arg == "--debug" {
             println!("Debug mode enabled");
             debug = true;
@@ -210,7 +211,22 @@ fn main() {
         }
     }
 
+    let cstrings: Vec<CString> = std::env::args()
+        .map(|arg| CString::new(arg).unwrap())
+        .collect();
+
+    let mut c_args: Vec<*mut c_char> = cstrings
+        .iter()
+        .map(|cstr| cstr.as_ptr().cast_mut())
+        .collect();
+
+    let mut argc: c_int = c_args.len() as c_int;
+    let mut argv_ptr: *mut *mut c_char = c_args.as_mut_ptr();
+
+    unsafe {
+        gtk_sys::gtk_init(&raw mut argc, &raw mut argv_ptr);
+    }
+
     println!("Started workspace indicator");
-    let mut workspace_handler = DynamicWorkspaces::new(debug, notify);
-    workspace_handler.connect_signals();
+    let mut workspaces = DynamicWorkspaces::new(debug, notify);
 }

@@ -9,7 +9,7 @@ use wnck_sys::{
 };
 
 pub struct Screen {
-    screen: *mut WnckScreen,
+    pub screen: *mut WnckScreen,
 }
 
 impl Screen {
@@ -25,9 +25,7 @@ impl Screen {
         if ptr.is_null() {
             None
         } else {
-            Some(Workspace {
-                workspace: ptr,
-            })
+            Some(Workspace { workspace: ptr })
         }
     }
 
@@ -37,7 +35,7 @@ impl Screen {
             let mut list = wnck_screen_get_workspaces(self.screen);
             while !list.is_null() {
                 let node = &*list;
-                let workspace_ptr = node.data as *mut WnckWorkspace;
+                let workspace_ptr = node.data.cast::<WnckWorkspace>();
                 out.push(Workspace {
                     workspace: workspace_ptr,
                 });
@@ -54,7 +52,7 @@ impl Screen {
             let mut list = wnck_screen_get_windows(self.screen);
             while !list.is_null() {
                 let node = &*list;
-                let workspace_str = node.data as *mut WnckWindow;
+                let workspace_str = node.data.cast::<WnckWindow>();
                 out.push(Window {
                     window: workspace_str,
                 });
