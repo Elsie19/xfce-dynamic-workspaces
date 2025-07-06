@@ -1,7 +1,4 @@
-use std::{
-    ffi::{CString, c_char, c_int, c_void},
-    time::Duration,
-};
+use std::ffi::{CString, c_char, c_int};
 
 use glib_sys::gpointer;
 use gobject_sys::{GCallback, g_signal_connect_data};
@@ -141,7 +138,7 @@ impl DynamicWorkspaces {
     }
 
     pub fn remove_blacklist(&self, windows: &mut Vec<Window>) -> Vec<Window> {
-        windows
+        let keep: Vec<Window> = windows
             .iter()
             .filter(|window| {
                 if window.is_sticky() {
@@ -160,7 +157,15 @@ impl DynamicWorkspaces {
                 true
             })
             .cloned()
-            .collect()
+            .collect();
+
+        if self.debug {
+            for window in &keep {
+                println!("{}", window.get_name());
+            }
+        }
+
+        keep
     }
 
     pub fn add_workspace(&self, workspaces_len: usize) {
