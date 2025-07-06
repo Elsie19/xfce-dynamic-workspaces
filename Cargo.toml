@@ -1,0 +1,8 @@
+[package]
+name = "xfce-dynamic-workspace"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+glib-sys = "0.8.0"
+wnck-sys = "0.1.0"
