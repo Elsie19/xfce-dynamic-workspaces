@@ -4,8 +4,8 @@ use wnck_sys::{
     WnckScreen, WnckWindow, WnckWorkspace, wnck_screen_get_active_workspace,
     wnck_screen_get_default, wnck_screen_get_windows, wnck_screen_get_workspaces,
     wnck_window_get_class_instance_name, wnck_window_get_name, wnck_window_get_role,
-    wnck_window_is_on_workspace, wnck_window_is_sticky, wnck_window_move_to_workspace,
-    wnck_workspace_get_number,
+    wnck_window_get_workspace, wnck_window_is_on_workspace, wnck_window_is_sticky,
+    wnck_window_move_to_workspace, wnck_workspace_get_number,
 };
 
 pub struct Screen {
@@ -20,9 +20,14 @@ impl Screen {
         }
     }
 
-    pub fn get_active_workspace(&self) -> Workspace {
-        Workspace {
-            workspace: unsafe { wnck_screen_get_active_workspace(self.screen) },
+    pub fn get_active_workspace(&self) -> Option<Workspace> {
+        let ptr = unsafe { wnck_screen_get_active_workspace(self.screen) };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(Workspace {
+                workspace: ptr,
+            })
         }
     }
 
@@ -61,8 +66,15 @@ impl Screen {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Workspace {
     workspace: *mut WnckWorkspace,
+}
+
+impl PartialEq<&Workspace> for Workspace {
+    fn eq(&self, other: &&Workspace) -> bool {
+        self.workspace == other.workspace
+    }
 }
 
 impl Workspace {
@@ -71,8 +83,18 @@ impl Workspace {
     }
 }
 
+#[derive(PartialEq, Eq)]
 pub struct Window {
     window: *mut WnckWindow,
+}
+
+// TODO: Check that this works and doesn't crash.
+impl Clone for Window {
+    fn clone(&self) -> Self {
+        Self {
+            window: self.window,
+        }
+    }
 }
 
 impl Window {
@@ -102,6 +124,15 @@ impl Window {
     pub fn move_to_workspace(&self, workspace: &Workspace) {
         unsafe {
             wnck_window_move_to_workspace(self.window, workspace.workspace);
+        }
+    }
+
+    pub fn get_workspace(&self) -> Option<Workspace> {
+        let ptr = unsafe { wnck_window_get_workspace(self.window) };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(Workspace { workspace: ptr })
         }
     }
 }
