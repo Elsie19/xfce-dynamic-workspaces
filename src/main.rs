@@ -66,8 +66,6 @@ impl DynamicWorkspaces {
         let workspaces = self.screen.get_workspaces();
         let workspaces_len = workspaces.len();
 
-        eprintln!("Workspaces: {workspaces_len}");
-
         // Initiates necessary scope variables and counts the windows on the relevant workspaces
         if !workspaces.is_empty() {
             let mut last = 0;
