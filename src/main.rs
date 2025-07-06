@@ -21,8 +21,8 @@ extern "C" fn workspace_callback(
 struct DynamicWorkspaces {
     debug: bool,
     notify: bool,
-    window_blacklist: Vec<String>,
-    window_classrole_blacklist: Vec<String>,
+    window_blacklist: Vec<&'static str>,
+    window_classrole_blacklist: Vec<&'static str>,
     last: usize,
     screen: Screen,
 }
@@ -42,16 +42,16 @@ impl DynamicWorkspaces {
             debug,
             notify,
             window_blacklist: vec![
-                String::from("Skriveboard"),
-                String::from("Desktop"),
-                String::from("xfdashboard"),
-                String::from("LightPad"),
-                String::from("xfce4-panel"),
-                String::from("plank"),
-                String::from("xfce4-notifyd"),
-                String::from("Whisker Menu"),
+                "Skriveboard",
+                "Desktop",
+                "xfdashboard",
+                "LightPad",
+                "xfce4-panel",
+                "plank",
+                "xfce4-notifyd",
+                "Whisker Menu",
             ],
-            window_classrole_blacklist: vec![String::from("tilix.quake")],
+            window_classrole_blacklist: vec!["tilix.quake"],
             last: 0,
             screen,
         }
@@ -140,13 +140,16 @@ impl DynamicWorkspaces {
                 if window.is_sticky() {
                     return false;
                 }
-                if self.window_blacklist.contains(&window.get_name()) {
+                if self.window_blacklist.contains(&window.get_name().as_str()) {
                     return false;
                 }
                 if !window.get_role().is_empty() {
                     let classrole =
                         format!("{}.{}", window.get_class_instance_name(), window.get_role());
-                    if self.window_classrole_blacklist.contains(&classrole) {
+                    if self
+                        .window_classrole_blacklist
+                        .contains(&classrole.as_str())
+                    {
                         return false;
                     }
                 }
