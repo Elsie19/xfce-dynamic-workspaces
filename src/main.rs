@@ -198,6 +198,11 @@ impl DynamicWorkspaces {
             "window-opened",
             "window-closed",
         ];
+
+        loop {
+            self.handle_dynamic_workspaces();
+            std::thread::sleep(Duration::from_secs(5));
+        }
     }
 }
 
@@ -237,8 +242,5 @@ fn main() {
 
     println!("Started workspace indicator");
     let mut workspaces = DynamicWorkspaces::new(debug, notify);
-    loop {
-        workspaces.handle_dynamic_workspaces();
-        std::thread::sleep(Duration::from_secs(5));
-    }
+    workspaces.connect_signals();
 }
