@@ -127,28 +127,26 @@ impl DynamicWorkspaces {
     }
 
     pub fn remove_blacklist(&self, windows: &mut Vec<Window>) -> Vec<Window> {
-        let mut i = 0;
-        while windows.len() > i {
-            if windows[i].is_sticky() {
-                windows.remove(i);
-                i -= 1;
-            } else if self.window_blacklist.contains(&windows[i].get_name()) {
-                windows.remove(i);
-                i -= 1;
-            } else if !windows[i].get_role().is_empty() {
-                if self.window_classrole_blacklist.contains(&format!(
-                    "{}.{}",
-                    windows[i].get_class_instance_name(),
-                    windows[i].get_role()
-                )) {
-                    windows.remove(i);
-                    i -= 1;
+        windows
+            .iter()
+            .filter(|window| {
+                if window.is_sticky() {
+                    return false;
                 }
-            }
-            i += 1;
-        }
-
-        windows.to_vec()
+                if self.window_blacklist.contains(&window.get_name()) {
+                    return false;
+                }
+                if !window.get_role().is_empty() {
+                    let classrole =
+                        format!("{}.{}", window.get_class_instance_name(), window.get_role());
+                    if self.window_classrole_blacklist.contains(&classrole) {
+                        return false;
+                    }
+                }
+                true
+            })
+            .cloned()
+            .collect()
     }
 
     pub fn add_workspace(&self, workspaces_len: usize) {
