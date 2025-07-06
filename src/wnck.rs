@@ -1,7 +1,11 @@
 use std::ffi::CStr;
 
 use wnck_sys::{
-    wnck_screen_force_update, wnck_screen_get_active_workspace, wnck_screen_get_default, wnck_screen_get_windows, wnck_screen_get_workspaces, wnck_window_get_class_instance_name, wnck_window_get_name, wnck_window_get_role, wnck_window_get_workspace, wnck_window_is_on_workspace, wnck_window_is_sticky, wnck_window_move_to_workspace, wnck_workspace_get_number, WnckScreen, WnckWindow, WnckWorkspace
+    WnckScreen, WnckWindow, WnckWorkspace, wnck_screen_force_update,
+    wnck_screen_get_active_workspace, wnck_screen_get_default, wnck_screen_get_windows,
+    wnck_screen_get_workspaces, wnck_window_get_class_instance_name, wnck_window_get_name,
+    wnck_window_get_role, wnck_window_get_workspace, wnck_window_is_on_workspace,
+    wnck_window_is_sticky, wnck_window_move_to_workspace, wnck_workspace_get_number,
 };
 
 pub struct Screen {
@@ -17,7 +21,9 @@ impl Screen {
     }
 
     pub fn force_update(&self) {
-        unsafe { wnck_screen_force_update(self.screen); }
+        unsafe {
+            wnck_screen_force_update(self.screen);
+        }
     }
 
     pub fn get_active_workspace(&self) -> Option<Workspace> {
@@ -117,7 +123,11 @@ impl Window {
 
     pub fn get_role(&self) -> String {
         let c_str = unsafe { wnck_window_get_role(self.window) };
-        unsafe { CStr::from_ptr(c_str).to_string_lossy().to_string() }
+        if c_str.is_null() {
+            String::new()
+        } else {
+            unsafe { CStr::from_ptr(c_str).to_string_lossy().to_string() }
+        }
     }
 
     pub fn move_to_workspace(&self, workspace: &Workspace) {
