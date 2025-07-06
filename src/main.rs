@@ -3,10 +3,23 @@ use std::{
     time::Duration,
 };
 
+use glib_sys::gpointer;
+use gobject_sys::{GCallback, g_signal_connect_data};
 use wmctrl::desktop;
 use wnck::{Screen, Window};
 
 mod wnck;
+
+extern "C" fn workspace_callback(
+    _screen: *mut wnck_sys::WnckScreen,
+    _data: *mut gobject_sys::GObject,
+    user_data: glib_sys::gpointer,
+) {
+    unsafe {
+        let workspaces = &mut *(user_data as *mut DynamicWorkspaces);
+        workspaces.handle_dynamic_workspaces();
+    }
+}
 
 struct DynamicWorkspaces {
     debug: bool,
@@ -199,6 +212,25 @@ impl DynamicWorkspaces {
 
     pub fn connect_signals(&mut self) {
         let _ = desktop::set_desktop_count(1);
+        let screen_ptr = self.screen.screen;
+
+        fn connect_signal(
+            screen: *mut gobject_sys::GObject,
+            signal: &str,
+            handler: GCallback,
+            data: gpointer,
+        ) {
+            let c_signal = CString::new(signal).unwrap();
+            unsafe {
+                g_signal_connect_data(screen, c_signal.as_ptr(), handler, data, None, 0);
+            }
+        }
+
+        let self_ptr = self as *mut _ as gpointer;
+
+        let gobject = screen_ptr as *mut gobject_sys::GObject;
+        let callback: GCallback =
+            unsafe { Some(std::mem::transmute(workspace_callback as *const ())) };
 
         let signals = [
             "active-workspace-changed",
@@ -208,9 +240,8 @@ impl DynamicWorkspaces {
             "window-closed",
         ];
 
-        loop {
-            self.handle_dynamic_workspaces();
-            std::thread::sleep(Duration::from_secs(5));
+        for signal in &signals {
+            connect_signal(gobject, signal, callback, self_ptr);
         }
     }
 }
@@ -252,4 +283,6 @@ fn main() {
     println!("Started workspace indicator");
     let mut workspaces = DynamicWorkspaces::new(debug, notify);
     workspaces.connect_signals();
+
+    gtk::main();
 }
