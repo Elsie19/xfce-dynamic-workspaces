@@ -46,6 +46,8 @@ impl DynamicWorkspaces {
         let workspaces = self.screen.get_workspaces();
         let workspaces_len = workspaces.len();
 
+        eprintln!("Workspaces: {workspaces_len}");
+
         // Initiates necessary scope variables and counts the windows on the relevant workspaces
         if !workspaces.is_empty() {
             let mut last = 0;
@@ -107,8 +109,6 @@ impl DynamicWorkspaces {
                 }
             }
         }
-
-        println!("{workspaces_len}");
 
         if let Some(workspace) = self.screen.get_active_workspace() {
             self.last = workspace.get_number() as usize;
@@ -239,7 +239,6 @@ fn main() {
     let mut workspaces = DynamicWorkspaces::new(debug, notify);
     loop {
         workspaces.handle_dynamic_workspaces();
-        println!("Bump");
         std::thread::sleep(Duration::from_secs(5));
     }
 }
