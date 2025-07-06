@@ -141,12 +141,12 @@ impl DynamicWorkspaces {
     }
 
     pub fn add_workspace(&self, workspaces_len: usize) {
-        let _ = desktop::set_desktop_count((workspaces_len + 1).try_into().unwrap_or(1));
+        let _ = desktop::set_desktop_count((workspaces_len + 1).try_into().unwrap());
     }
 
     pub fn pop_workspace(&self, workspaces_len: usize) {
         if self.screen.get_workspaces().len() > 2 {
-            let _ = desktop::set_desktop_count((workspaces_len - 1).try_into().unwrap_or(1));
+            let _ = desktop::set_desktop_count((workspaces_len - 1).try_into().unwrap());
         }
     }
 
