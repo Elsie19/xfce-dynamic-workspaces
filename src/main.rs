@@ -229,8 +229,8 @@ fn main() {
     let mut argv_ptr: *mut *mut c_char = c_args.as_mut_ptr();
 
     unsafe {
-        if gtk_sys::gtk_init_check(&raw mut argc, &raw mut argv_ptr) == 0 {
-            eprintln!("`gtk_init_check` failed to start");
+        if gdk_sys::gdk_init_check(&raw mut argc, &raw mut argv_ptr) == 0 {
+            eprintln!("`gdk_init_check` failed to start");
             std::process::exit(1);
         }
     }

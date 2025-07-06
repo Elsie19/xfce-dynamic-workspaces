@@ -31,6 +31,7 @@ impl Screen {
 
     pub fn get_workspaces(&self) -> Vec<Workspace> {
         let mut out = vec![];
+
         unsafe {
             let mut list = wnck_screen_get_workspaces(self.screen);
             while !list.is_null() {
