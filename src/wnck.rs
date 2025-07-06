@@ -1,11 +1,7 @@
 use std::ffi::CStr;
 
 use wnck_sys::{
-    WnckScreen, WnckWindow, WnckWorkspace, wnck_screen_get_active_workspace,
-    wnck_screen_get_default, wnck_screen_get_windows, wnck_screen_get_workspaces,
-    wnck_window_get_class_instance_name, wnck_window_get_name, wnck_window_get_role,
-    wnck_window_get_workspace, wnck_window_is_on_workspace, wnck_window_is_sticky,
-    wnck_window_move_to_workspace, wnck_workspace_get_number,
+    wnck_screen_force_update, wnck_screen_get_active_workspace, wnck_screen_get_default, wnck_screen_get_windows, wnck_screen_get_workspaces, wnck_window_get_class_instance_name, wnck_window_get_name, wnck_window_get_role, wnck_window_get_workspace, wnck_window_is_on_workspace, wnck_window_is_sticky, wnck_window_move_to_workspace, wnck_workspace_get_number, WnckScreen, WnckWindow, WnckWorkspace
 };
 
 pub struct Screen {
@@ -18,6 +14,10 @@ impl Screen {
         Self {
             screen: unsafe { wnck_screen_get_default() },
         }
+    }
+
+    pub fn force_update(&self) {
+        unsafe { wnck_screen_force_update(self.screen); }
     }
 
     pub fn get_active_workspace(&self) -> Option<Workspace> {

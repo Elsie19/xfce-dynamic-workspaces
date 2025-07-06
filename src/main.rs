@@ -19,6 +19,17 @@ struct DynamicWorkspaces {
 
 impl DynamicWorkspaces {
     pub fn new(debug: bool, notify: bool) -> Self {
+        let screen = Screen::get_default();
+
+        // This forces Wnck to query the window manager
+        screen.force_update();
+
+        // Let GTK process pending events once
+        unsafe {
+            while gtk_sys::gtk_events_pending() != 0 {
+                gtk_sys::gtk_main_iteration_do(0);
+            }
+        }
         Self {
             debug,
             notify,
@@ -33,7 +44,7 @@ impl DynamicWorkspaces {
             ],
             window_classrole_blacklist: vec![String::from("tilix.quake")],
             last: 0,
-            screen: Screen::get_default(),
+            screen,
         }
     }
 
