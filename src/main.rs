@@ -1,4 +1,7 @@
-use std::ffi::{CString, c_char, c_int, c_void};
+use std::{
+    ffi::{CString, c_char, c_int, c_void},
+    time::Duration,
+};
 
 use wmctrl::desktop;
 use wnck::{Screen, Window};
@@ -104,6 +107,8 @@ impl DynamicWorkspaces {
                 }
             }
         }
+
+        println!("{workspaces_len}");
 
         if let Some(workspace) = self.screen.get_active_workspace() {
             self.last = workspace.get_number() as usize;
@@ -224,9 +229,17 @@ fn main() {
     let mut argv_ptr: *mut *mut c_char = c_args.as_mut_ptr();
 
     unsafe {
-        gtk_sys::gtk_init(&raw mut argc, &raw mut argv_ptr);
+        if gtk_sys::gtk_init_check(&raw mut argc, &raw mut argv_ptr) == 0 {
+            eprintln!("`gtk_init_check` failed to start");
+            std::process::exit(1);
+        }
     }
 
     println!("Started workspace indicator");
     let mut workspaces = DynamicWorkspaces::new(debug, notify);
+    loop {
+        workspaces.handle_dynamic_workspaces();
+        println!("Bump");
+        std::thread::sleep(Duration::from_secs(5));
+    }
 }
