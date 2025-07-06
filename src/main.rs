@@ -50,6 +50,7 @@ impl DynamicWorkspaces {
                 String::from("Skriveboard"),
                 String::from("Desktop"),
                 String::from("xfdashboard"),
+                String::from("LightPad"),
                 String::from("xfce4-panel"),
                 String::from("plank"),
                 String::from("xfce4-notifyd"),
