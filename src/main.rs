@@ -1,3 +1,4 @@
+use gtk::Application;
 use wmctrl::desktop;
 use wnck::{Screen, Window};
 
@@ -195,5 +196,21 @@ impl DynamicWorkspaces {
 }
 
 fn main() {
-    println!("Hello, world!");
+    let args = std::env::args().collect::<Vec<String>>();
+    let mut debug = false;
+    let mut notify = true;
+
+    for arg in args {
+        if arg == "--debug" {
+            println!("Debug mode enabled");
+            debug = true;
+        } else if arg == "--no-notify" {
+            println!("Notifications disabled");
+            notify = false;
+        }
+    }
+
+    println!("Started workspace indicator");
+    let mut workspace_handler = DynamicWorkspaces::new(debug, notify);
+    workspace_handler.connect_signals();
 }
