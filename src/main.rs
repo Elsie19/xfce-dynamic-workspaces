@@ -280,6 +280,8 @@ fn main() {
         }
     }
 
+    gtk::init().expect("Failed to initialize GTK");
+
     println!("Started workspace indicator");
     let mut workspaces = DynamicWorkspaces::new(debug, notify);
     workspaces.connect_signals();
