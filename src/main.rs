@@ -176,12 +176,11 @@ impl DynamicWorkspaces {
 
     pub fn remove_workspace_by_index(&self, index: usize) {
         let workspace_num = self.screen.get_active_workspace().map(|ws| ws.get_number());
-        let workspaces = String::from_utf8(wmctrl::list_desktops().stdout)
-            .expect("not valid UTF-8")
-            .lines()
-            .collect::<Vec<_>>()
-            .len();
-
+        let workspaces = wmctrl::list_desktops()
+            .stdout
+            .iter()
+            .filter(|&&b| b == b'\n')
+            .count();
         let windows: Vec<Window> = self
             .screen
             .get_windows()
