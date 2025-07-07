@@ -21,8 +21,8 @@ extern "C" fn workspace_callback(
 struct DynamicWorkspaces {
     debug: bool,
     notify: bool,
-    window_blacklist: Vec<&'static str>,
-    window_classrole_blacklist: Vec<&'static str>,
+    window_blacklist: &'static [&'static str],
+    window_classrole_blacklist: &'static [&'static str],
     last: usize,
     screen: Screen,
 }
@@ -41,7 +41,7 @@ impl DynamicWorkspaces {
         Self {
             debug,
             notify,
-            window_blacklist: vec![
+            window_blacklist: &[
                 "Skriveboard",
                 "Desktop",
                 "xfdashboard",
@@ -51,14 +51,11 @@ impl DynamicWorkspaces {
                 "xfce4-notifyd",
                 "Whisker Menu",
             ],
-            window_classrole_blacklist: vec!["tilix.quake"],
+            window_classrole_blacklist: &["tilix.quake"],
             last: 0,
             screen,
         }
     }
-
-    // TODO: Add libnotify.
-    pub fn update_notification(&self) {}
 
     /// Main logic for handling of dynamic workspaces
     pub fn handle_dynamic_workspaces(&mut self) {
