@@ -1,4 +1,5 @@
 use std::ffi::CStr;
+use std::borrow::Cow;
 
 use wnck_sys::{
     WnckScreen, WnckWindow, WnckWorkspace, wnck_screen_force_update,
@@ -111,22 +112,22 @@ impl Window {
         unsafe { wnck_window_is_sticky(self.window) != 0 }
     }
 
-    pub fn get_name(&self) -> String {
+    pub fn get_name(&self) -> Cow<'_, str> {
         let c_str = unsafe { wnck_window_get_name(self.window) };
-        unsafe { CStr::from_ptr(c_str).to_string_lossy().to_string() }
+        unsafe { CStr::from_ptr(c_str).to_string_lossy() }
     }
 
-    pub fn get_class_instance_name(&self) -> String {
+    pub fn get_class_instance_name(&self) -> Cow<'_, str> {
         let c_str = unsafe { wnck_window_get_class_instance_name(self.window) };
-        unsafe { CStr::from_ptr(c_str).to_string_lossy().to_string() }
+        unsafe { CStr::from_ptr(c_str).to_string_lossy() }
     }
 
-    pub fn get_role(&self) -> String {
+    pub fn get_role(&self) -> Cow<'_, str> {
         let c_str = unsafe { wnck_window_get_role(self.window) };
         if c_str.is_null() {
-            String::new()
+            Cow::Borrowed("")
         } else {
-            unsafe { CStr::from_ptr(c_str).to_string_lossy().to_string() }
+            unsafe { CStr::from_ptr(c_str).to_string_lossy() }
         }
     }
 

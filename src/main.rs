@@ -137,7 +137,7 @@ impl DynamicWorkspaces {
                 if window.is_sticky() {
                     return false;
                 }
-                if self.window_blacklist.contains(&window.get_name().as_str()) {
+                if self.window_blacklist.contains(&window.get_name().as_ref()) {
                     return false;
                 }
                 if !window.get_role().is_empty() {
