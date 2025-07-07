@@ -4,6 +4,9 @@ use glib_sys::gpointer;
 use gobject_sys::{GCallback, g_signal_connect_data};
 use wnck::{Screen, Window};
 
+#[cfg(feature = "notify")]
+mod notify;
+
 mod wmctrl;
 mod wnck;
 
@@ -15,6 +18,18 @@ extern "C" fn workspace_callback(
     unsafe {
         let workspaces = &mut *user_data.cast::<DynamicWorkspaces>();
         workspaces.handle_dynamic_workspaces();
+    }
+}
+
+#[cfg(feature = "notify")]
+extern "C" fn notify_callback(
+    _screen: *mut wnck_sys::WnckScreen,
+    _data: *mut gobject_sys::GObject,
+    user_data: glib_sys::gpointer,
+) {
+    unsafe {
+        let workspaces = &mut *user_data.cast::<DynamicWorkspaces>();
+        workspaces.update_notification();
     }
 }
 
@@ -38,6 +53,11 @@ impl DynamicWorkspaces {
             }
         }
 
+        #[cfg(feature = "notify")]
+        if notify {
+            notify::default_notification();
+        }
+
         Self {
             debug,
             notify,
@@ -54,6 +74,14 @@ impl DynamicWorkspaces {
             window_classrole_blacklist: &[("tilix", "quake")],
             last: 0,
             screen,
+        }
+    }
+
+    #[cfg(feature = "notify")]
+    pub fn update_notification(&self) {
+        if let Some(workspace_num) = self.screen.get_active_workspace() {
+            let workspace_num = workspace_num.get_number() + 1;
+            notify::update_notification(workspace_num);
         }
     }
 
@@ -241,6 +269,21 @@ impl DynamicWorkspaces {
             "window-opened",
             "window-closed",
         ];
+
+        #[cfg(feature = "notify")]
+        if self.notify {
+            let notify_callback: GCallback = unsafe {
+                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                    notify_callback as *const (),
+                ))
+            };
+            connect_signal(
+                gobject,
+                "active-workspace-changed",
+                notify_callback,
+                self_ptr,
+            );
+        }
 
         for signal in &signals {
             connect_signal(gobject, signal, callback, self_ptr);

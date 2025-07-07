@@ -6,6 +6,10 @@ license = "GPL-3.0-or-later"
 build = "build.rs"
 rust-version = "1.85.0"
 
+[features]
+default = ["notify"]
+notify = ["dep:notify-rust"]
+
 [dependencies]
 glib-sys = "0.8.0"
 glib = "0.18.5"
@@ -15,6 +19,10 @@ gtk-sys = "0.18.2"
 gdk-sys = "0.18.2"
 gtk = "0.18"
 gobject-sys = "0.8.0"
+notify-rust = { version = "4.11.7", optional = true, default-features = false, features = [
+    "zbus",
+    "serde",
+] }
 
 [profile.release]
 lto = "fat"
