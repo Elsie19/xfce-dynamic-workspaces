@@ -18,3 +18,4 @@ gobject-sys = "0.8.0"
 
 [profile.release]
 lto = "fat"
+codegen-units = 1
