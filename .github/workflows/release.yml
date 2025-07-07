@@ -1,0 +1,34 @@
+name: xfce-dynamic-workspace Binary Generation
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+        - arch: amd64
+          runner: ubuntu-latest
+        - arch: arm64
+          runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install needed packages
+      run: |
+        sudo rm -rf /var/lib/apt/lists/*
+        sudo apt-get update && sudo apt-get install rustup pkg-config libwnck-3-0 libwnck-3-dev
+        rustup update && rustup default stable
+
+    - name: Build
+      run: cargo build --release --locked
+
+    - uses: actions/upload-artifact@v4.6.2
+      with:
+        name: xfce-dynamic-workspaces (${{ matrix.arch }})
+        path: target/release/xfce-dynamic-workspace
