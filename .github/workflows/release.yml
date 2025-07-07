@@ -1,4 +1,4 @@
-name: xfce-dynamic-workspace Binary Generation
+name: xfce4-dynamic-workspaces Binary Generation
 
 on:
   workflow_dispatch:
@@ -31,4 +31,4 @@ jobs:
     - uses: actions/upload-artifact@v4.6.2
       with:
         name: xfce-dynamic-workspaces (${{ matrix.arch }})
-        path: target/release/xfce-dynamic-workspace
+        path: target/release/xfce4-dynamic-workspaces
