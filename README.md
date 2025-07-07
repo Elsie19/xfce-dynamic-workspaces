@@ -1,4 +1,4 @@
-# xfce-dynamic-workspaces
+# xfce4-dynamic-workspaces
 
 This is a rewrite of https://github.com/DimseBoms/XFCE-Dynamic-Workspace but rewritten in the lord's language (rust) and uses the libraries that the python version uses under the hood through an FFI layer.
 
