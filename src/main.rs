@@ -22,7 +22,7 @@ struct DynamicWorkspaces {
     debug: bool,
     notify: bool,
     window_blacklist: &'static [&'static str],
-    window_classrole_blacklist: &'static [&'static str],
+    window_classrole_blacklist: &'static [(&'static str, &'static str)],
     last: usize,
     screen: Screen,
 }
@@ -51,7 +51,7 @@ impl DynamicWorkspaces {
                 "xfce4-notifyd",
                 "Whisker Menu",
             ],
-            window_classrole_blacklist: &["tilix.quake"],
+            window_classrole_blacklist: &[("tilix", "quake")],
             last: 0,
             screen,
         }
@@ -141,12 +141,10 @@ impl DynamicWorkspaces {
                     return false;
                 }
                 if !window.get_role().is_empty() {
-                    let classrole =
-                        format!("{}.{}", window.get_class_instance_name(), window.get_role());
-                    if self
-                        .window_classrole_blacklist
-                        .contains(&classrole.as_str())
-                    {
+                    if self.window_classrole_blacklist.contains(&(
+                        window.get_class_instance_name().as_ref(),
+                        window.get_role().as_ref(),
+                    )) {
                         return false;
                     }
                 }
