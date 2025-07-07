@@ -167,13 +167,13 @@ impl DynamicWorkspaces {
                 if self.window_blacklist.contains(&window.get_name().as_ref()) {
                     return false;
                 }
-                if !window.get_role().is_empty() {
-                    if self.window_classrole_blacklist.contains(&(
+                if !window.get_role().is_empty()
+                    && self.window_classrole_blacklist.contains(&(
                         window.get_class_instance_name().as_ref(),
                         window.get_role().as_ref(),
-                    )) {
-                        return false;
-                    }
+                    ))
+                {
+                    return false;
                 }
                 true
             })
