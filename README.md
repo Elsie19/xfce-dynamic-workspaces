@@ -11,3 +11,7 @@ When developing or making PRs, please use any and all optimizations that follow 
 * Try not to introduce new crates.
 * If you have to choose between readability and absolute performance, choose readability.
 * Try not to heap allocate if possible.
+
+## Other
+
+This project aims to be as tiny as possible, with the exception that it must implement all features from the python version. One such hurdle is having notification support, which (relatively) balloons the binary size, so for users (or distributions) that don't want notification support or the dependency chain, you can disable the `notify` feature.

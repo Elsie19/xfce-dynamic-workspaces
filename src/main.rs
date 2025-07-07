@@ -65,7 +65,6 @@ impl DynamicWorkspaces {
                 "Skriveboard",
                 "Desktop",
                 "xfdashboard",
-                "LightPad",
                 "xfce4-panel",
                 "plank",
                 "xfce4-notifyd",
