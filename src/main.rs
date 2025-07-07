@@ -2,9 +2,9 @@ use std::ffi::{CString, c_char, c_int};
 
 use glib_sys::gpointer;
 use gobject_sys::{GCallback, g_signal_connect_data};
-use wmctrl::desktop;
 use wnck::{Screen, Window};
 
+mod wmctrl;
 mod wnck;
 
 extern "C" fn workspace_callback(
@@ -165,18 +165,18 @@ impl DynamicWorkspaces {
     }
 
     pub fn add_workspace(&self, workspaces_len: usize) {
-        let _ = desktop::set_desktop_count((workspaces_len + 1).try_into().unwrap());
+        let _ = wmctrl::set_desktop_count((workspaces_len + 1).try_into().unwrap());
     }
 
     pub fn pop_workspace(&self, workspaces_len: usize) {
         if self.screen.get_workspaces().len() > 2 {
-            let _ = desktop::set_desktop_count((workspaces_len - 1).try_into().unwrap());
+            let _ = wmctrl::set_desktop_count((workspaces_len - 1).try_into().unwrap());
         }
     }
 
     pub fn remove_workspace_by_index(&self, index: usize) {
         let workspace_num = self.screen.get_active_workspace().map(|ws| ws.get_number());
-        let workspaces = String::from_utf8(desktop::list_desktops().stdout)
+        let workspaces = String::from_utf8(wmctrl::list_desktops().stdout)
             .expect("not valid UTF-8")
             .lines()
             .collect::<Vec<_>>()
@@ -207,13 +207,13 @@ impl DynamicWorkspaces {
         // workspace_num should be Option<usize>
         if let Some(workspace_num) = workspace_num {
             if self.last < workspace_num as usize {
-                let _ = desktop::switch_desktop(index.to_string().as_str());
+                let _ = wmctrl::switch_desktop(index.to_string());
             }
         }
     }
 
     pub fn connect_signals(&mut self) {
-        let _ = desktop::set_desktop_count(1);
+        let _ = wmctrl::set_desktop_count(1);
         let screen_ptr = self.screen.screen;
 
         fn connect_signal(
