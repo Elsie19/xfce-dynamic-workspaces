@@ -14,7 +14,6 @@ notify = ["dep:notify-rust"]
 glib-sys = "0.8.0"
 glib = "0.18.5"
 wnck-sys = "0.1.0"
-gtk4 = "0.9.7"
 gtk-sys = "0.18.2"
 gdk-sys = "0.18.2"
 gtk = "0.18"
