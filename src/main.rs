@@ -68,7 +68,7 @@ impl DynamicWorkspaces {
             let mut last = 0;
             let mut next_last = 0;
             // Removes blacklisted windows from the list of visible windows
-            let windows = self.remove_blacklist(&mut self.screen.get_windows());
+            let windows = self.remove_blacklist(&self.screen.get_windows());
 
             // Counts windows
             for window in windows {
@@ -97,7 +97,7 @@ impl DynamicWorkspaces {
         let workspaces_len = workspaces.len();
 
         if workspaces_len > 2 {
-            let windows = self.remove_blacklist(&mut self.screen.get_windows());
+            let windows = self.remove_blacklist(&self.screen.get_windows());
             for (idx, workspace) in workspaces
                 .iter()
                 .take(workspaces.len().saturating_sub(1))
@@ -130,7 +130,7 @@ impl DynamicWorkspaces {
         }
     }
 
-    pub fn remove_blacklist(&self, windows: &mut [Window]) -> Vec<Window> {
+    pub fn remove_blacklist(&self, windows: &[Window]) -> Vec<Window> {
         let keep: Vec<Window> = windows
             .iter()
             .filter(|window| {
