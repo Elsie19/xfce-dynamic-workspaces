@@ -4,12 +4,12 @@ use std::ffi::CStr;
 use wnck_sys::{
     WnckScreen, WnckWindow, WnckWorkspace, wnck_screen_force_update,
     wnck_screen_get_active_workspace, wnck_screen_get_default, wnck_screen_get_windows,
-    wnck_screen_get_workspaces, wnck_window_get_class_instance_name, wnck_window_get_name,
-    wnck_window_get_role, wnck_window_get_workspace, wnck_window_is_on_workspace,
-    wnck_window_is_sticky, wnck_window_move_to_workspace, wnck_workspace_activate,
-    wnck_workspace_change_name, wnck_workspace_get_height, wnck_workspace_get_name,
-    wnck_workspace_get_number, wnck_workspace_get_screen, wnck_workspace_get_width,
-    wnck_workspace_is_virtual,
+    wnck_screen_get_workspace_count, wnck_screen_get_workspaces,
+    wnck_window_get_class_instance_name, wnck_window_get_name, wnck_window_get_role,
+    wnck_window_get_workspace, wnck_window_is_on_workspace, wnck_window_is_sticky,
+    wnck_window_move_to_workspace, wnck_workspace_activate, wnck_workspace_change_name,
+    wnck_workspace_get_height, wnck_workspace_get_name, wnck_workspace_get_number,
+    wnck_workspace_get_screen, wnck_workspace_get_width, wnck_workspace_is_virtual,
 };
 
 pub struct Screen {
@@ -49,8 +49,14 @@ impl Screen {
         }
     }
 
+    /// Get a list of workspaces on a screen.
+    ///
+    /// # Note
+    /// There is no guarantee that the workspaces will be valid by the time the caller uses them,
+    /// so be warned.
     pub fn get_workspaces(&self) -> Vec<Workspace> {
-        let mut out = vec![];
+        let work_count = unsafe { wnck_screen_get_workspace_count(self.screen) };
+        let mut out = Vec::with_capacity(work_count as usize);
 
         unsafe {
             let mut list = wnck_screen_get_workspaces(self.screen);
