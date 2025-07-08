@@ -238,7 +238,7 @@ impl DynamicWorkspaces {
 
     pub fn connect_signals(&mut self) {
         let _ = wmctrl::set_desktop_count(1);
-        let screen_ptr = self.screen.screen;
+        let screen_ptr = self.screen.as_mut_ptr();
 
         fn connect_signal(
             screen: *mut gobject_sys::GObject,

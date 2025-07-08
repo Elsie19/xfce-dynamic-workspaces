@@ -1,16 +1,19 @@
-use std::ffi::CStr;
 use std::borrow::Cow;
+use std::ffi::CStr;
 
 use wnck_sys::{
     WnckScreen, WnckWindow, WnckWorkspace, wnck_screen_force_update,
     wnck_screen_get_active_workspace, wnck_screen_get_default, wnck_screen_get_windows,
     wnck_screen_get_workspaces, wnck_window_get_class_instance_name, wnck_window_get_name,
     wnck_window_get_role, wnck_window_get_workspace, wnck_window_is_on_workspace,
-    wnck_window_is_sticky, wnck_window_move_to_workspace, wnck_workspace_get_number,
+    wnck_window_is_sticky, wnck_window_move_to_workspace, wnck_workspace_activate,
+    wnck_workspace_change_name, wnck_workspace_get_height, wnck_workspace_get_name,
+    wnck_workspace_get_number, wnck_workspace_get_screen, wnck_workspace_get_width,
+    wnck_workspace_is_virtual,
 };
 
 pub struct Screen {
-    pub screen: *mut WnckScreen,
+    screen: *mut WnckScreen,
 }
 
 impl Screen {
@@ -21,12 +24,22 @@ impl Screen {
         }
     }
 
+    /// Get mutable inner pointer.
+    pub const fn as_mut_ptr(&mut self) -> *mut WnckScreen {
+        self.screen
+    }
+
+    /// Force update the screen.
     pub fn force_update(&self) {
         unsafe {
             wnck_screen_force_update(self.screen);
         }
     }
 
+    /// Get active workspace that screen is on.
+    ///
+    /// # Returns
+    /// The optional workspace that the screen is on.
     pub fn get_active_workspace(&self) -> Option<Workspace> {
         let ptr = unsafe { wnck_screen_get_active_workspace(self.screen) };
         if ptr.is_null() {
@@ -87,6 +100,45 @@ impl Workspace {
     pub fn get_number(&self) -> i32 {
         unsafe { wnck_workspace_get_number(self.workspace) }
     }
+
+    pub fn get_size(&self) -> (i32, i32) {
+        unsafe {
+            (
+                wnck_workspace_get_width(self.workspace),
+                wnck_workspace_get_height(self.workspace),
+            )
+        }
+    }
+
+    pub fn get_screen(&self) -> Screen {
+        unsafe {
+            Screen {
+                screen: wnck_workspace_get_screen(self.workspace),
+            }
+        }
+    }
+
+    pub fn get_name(&self) -> Cow<'_, str> {
+        let c_str = unsafe { wnck_workspace_get_name(self.workspace) };
+        unsafe { CStr::from_ptr(c_str).to_string_lossy() }
+    }
+
+    pub fn change_name<S: AsRef<CStr>>(&mut self, name: S) {
+        unsafe {
+            wnck_workspace_change_name(self.workspace, name.as_ref().as_ptr());
+        }
+    }
+
+    /// Attempt to make this the active workspace.
+    pub fn activate(&self, timestamp: u32) {
+        unsafe {
+            wnck_workspace_activate(self.workspace, timestamp);
+        }
+    }
+
+    pub fn is_virtual(&self) -> bool {
+        unsafe { wnck_workspace_is_virtual(self.workspace) != 0 }
+    }
 }
 
 #[derive(PartialEq, Eq)]
@@ -94,7 +146,6 @@ pub struct Window {
     window: *mut WnckWindow,
 }
 
-// TODO: Check that this works and doesn't crash.
 impl Clone for Window {
     fn clone(&self) -> Self {
         Self {
