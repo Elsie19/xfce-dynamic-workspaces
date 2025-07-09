@@ -120,9 +120,12 @@ impl DynamicWorkspaces {
             }
         }
 
+        // Refresh the current workspaces and windows
         let workspaces = self.screen.get_workspaces();
         let workspaces_len = workspaces.len();
 
+        // If there are more than 2 workspaces, iterate through all the workspaces except the last
+        // one and check if they are empty. if they are, remove them.
         if workspaces_len > 2 {
             let windows = self.remove_blacklist(&self.screen.get_windows());
             for (idx, workspace) in workspaces
@@ -152,11 +155,13 @@ impl DynamicWorkspaces {
             }
         }
 
+        // Update last workspace.
         if let Some(workspace) = self.screen.get_active_workspace() {
             self.last = workspace.get_number() as usize;
         }
     }
 
+    /// Removes blacklisted windows from the list of visible windows
     pub fn remove_blacklist(&self, windows: &[Window]) -> Vec<Window> {
         let keep: Vec<Window> = windows
             .iter()
@@ -189,6 +194,8 @@ impl DynamicWorkspaces {
         keep
     }
 
+    /// Functions for handling adding/removal of workspaces. These functions just work as an
+    /// interface to send shell commands with wmctrl.
     pub fn add_workspace(&self, workspaces_len: usize) {
         let _ = wmctrl::set_desktop_count((workspaces_len + 1).try_into().unwrap());
     }
@@ -199,13 +206,19 @@ impl DynamicWorkspaces {
         }
     }
 
+    /// Removes a workspace by index using wmctrl
     pub fn remove_workspace_by_index(&self, index: usize) {
+        // Get current workspace number
         let workspace_num = self.screen.get_active_workspace().map(|ws| ws.get_number());
+        // Get current workspaces using wmctrl
         let workspaces = wmctrl::list_desktops()
             .stdout
             .iter()
             .filter(|&&b| b == b'\n')
             .count();
+        // Get current windows and their workspaces.
+        // Filter out the windows that dont' have workspaces or are on any workspace on a lower
+        // index than the workspace to be removed
         let windows: Vec<Window> = self
             .screen
             .get_windows()
@@ -221,6 +234,7 @@ impl DynamicWorkspaces {
 
         for window in windows {
             if let Some(workspace) = window.get_workspace() {
+                // Move the windows that are left one workspace to the left
                 window.move_to_workspace(
                     &self.screen.get_workspaces()[workspace.get_number() as usize - 1],
                 );
@@ -228,7 +242,7 @@ impl DynamicWorkspaces {
         }
         self.pop_workspace(workspaces);
 
-        // workspace_num should be Option<usize>
+        // Make sure you stay on the workspace
         if let Some(workspace_num) = workspace_num {
             if self.last < workspace_num as usize {
                 let _ = wmctrl::switch_desktop(index.to_string());
