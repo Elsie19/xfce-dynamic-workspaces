@@ -197,12 +197,12 @@ impl DynamicWorkspaces {
     /// Functions for handling adding/removal of workspaces. These functions just work as an
     /// interface to send shell commands with wmctrl.
     pub fn add_workspace(&self, workspaces_len: usize) {
-        let _ = wmctrl::set_desktop_count((workspaces_len + 1).try_into().unwrap());
+        let _ = wmctrl::set_desktop_count(workspaces_len + 1);
     }
 
     pub fn pop_workspace(&self, workspaces_len: usize) {
         if self.screen.get_workspaces().len() > 2 {
-            let _ = wmctrl::set_desktop_count((workspaces_len - 1).try_into().unwrap());
+            let _ = wmctrl::set_desktop_count(workspaces_len - 1);
         }
     }
 
@@ -217,7 +217,7 @@ impl DynamicWorkspaces {
             .filter(|&&b| b == b'\n')
             .count();
         // Get current windows and their workspaces.
-        // Filter out the windows that dont' have workspaces or are on any workspace on a lower
+        // Filter out the windows that don't have workspaces or are on any workspace on a lower
         // index than the workspace to be removed
         let windows: Vec<Window> = self
             .screen
